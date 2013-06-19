@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE attributes PUBLIC "-//NetBeans//DTD DefaultAttributes 1.0//EN" "http://www.netbeans.org/dtds/attributes-1_0.dtd">
+<attributes version="1.0">
+    <fileobject name="ConfigurationWindow.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="ConfigurationWindow"/>
+    </fileobject>
+    <fileobject name="MainWindow.java">
+        <attr name="class_dependency_system.StatusOutputInterface" stringvalue="MainWindow"/>
+        <attr name="class_dependency_javax.swing.JFrame" stringvalue="MainWindow"/>
+    </fileobject>
+    <fileobject name="AddKeySource.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="AddKeySource"/>
+    </fileobject>
+    <fileobject name="KeyGenStatusDlg.java">
+        <attr name="class_dependency_java.lang.Runnable" stringvalue="KeyGenStatusDlg.KeyGenerator"/>
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="KeyGenStatusDlg"/>
+    </fileobject>
+    <fileobject name="EnterPassphraseDlg.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="EnterPassphraseDlg"/>
+    </fileobject>
+    <fileobject name="OpenPGPKeyManager.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="OpenPGPKeyManager"/>
+        <attr name="class_dependency_javax.swing.AbstractListModel" stringvalue="OpenPGPKeyManager.KeySourceListModel"/>
+        <attr name="class_dependency_javax.swing.tree.DefaultTreeCellRenderer" stringvalue="OpenPGPKeyManager.KeyringCellRenderer"/>
+    </fileobject>
+    <fileobject name="EditKeySource.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="EditKeySource"/>
+    </fileobject>
+</attributes>

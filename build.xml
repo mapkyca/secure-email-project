@@ -1,0 +1,279 @@
+<project name="Oxford Brookes Secure Email Project" default="dist">
+
+<description>
+This buildfile is used to build the Oxford Brookes 
+University Secure Email Project secure email proxy 
+and sub projects.
+</description>
+	
+<!-- set global properties for this build -->
+<property name="src" location="src"/>
+<property name="doc" location="doc"/>
+<property name="bld" location="build"/>
+<property name="dst" location="release"/>
+<property name="snap" location="snapshot"/>
+
+<target name="init">
+	<echo>Setting timestamp...</echo>
+		<tstamp/>
+		
+	<echo>Loading build info...</echo>
+		<property file="${src}/res/build.info"/>
+		
+	 <!-- <record name="build.log" append="no"/> -->
+	
+</target>
+
+
+<target name="document" depends="init" description="Construct API documentation">
+	<mkdir dir="${doc}"/>
+	<javadoc 
+		packageList="${src}/packages"
+		sourcepath="${src}"
+		destdir="${doc}"
+		windowtitle="Secure Email Project"
+		overview="${src}/overview.html"
+		author="true"
+		version="true"
+		use="true"
+		splitindex="true"
+		additionalparam="-docfilessubdirs"
+		
+		failonerror="true"
+	>
+		<doctitle><![CDATA[The Oxford Brookes Secure Email Project<br>Secure Email Proxy Application]]></doctitle>
+		<header><![CDATA[<b>The Oxford Brookes Secure Email Project</b>]]></header>
+		<bottom><![CDATA[<font size=\"-1\">Copyright 2002 The Oxford Brookes University, Secure Email Project.<br><a href=\"http://secemail.brookes.ac.uk\" target=\"_blank\">http://secemail.brookes.ac.uk</a></font>]]></bottom>
+	</javadoc>
+</target>
+
+<target name="build" depends="init" description="Build sources">
+	<echo>Building Email Proxy Application and library...</echo>
+
+                <mkdir dir="${bld}"/>
+		
+		<copy todir="${bld}/res">
+			<fileset dir="${src}/res"/>
+		</copy>
+                
+                <copy todir="${bld}/core/keyhandlers">
+                    <fileset dir="${src}/core/keyhandlers/" includes="*.lst"/>
+                </copy>
+
+		<javac srcdir="${src}"
+			destdir="${bld}"
+		>
+			<!-- Force build of each dir so i don't have to manually clean each time -->
+			<include name="ui/*"/>
+			<include name="system/*"/>
+			<include name="core/*"/>
+			<include name="core/email/*"/>
+			<include name="core/email/encoders/*"/>
+			<include name="core/email/util/*"/>
+			<include name="core/interfaces/*"/>
+			<include name="core/exceptions/*"/>
+			<include name="core/exceptions/openpgp/*"/>
+			<include name="core/protocolhandlers/*"/>
+			<include name="core/iptp/*"/>
+			<include name="core/algorithmhandlers/*"/>
+			<include name="core/algorithmhandlers/keymaterial/*"/>
+			<include name="core/algorithmhandlers/openpgp/*"/>
+			<include name="core/algorithmhandlers/openpgp/packets/*"/>
+			<include name="core/algorithmhandlers/openpgp/packets/v4signature/*"/>
+			<include name="core/algorithmhandlers/openpgp/util/*"/>
+			<include name="core/keyhandlers/*"/>
+			<include name="core/keyhandlers/parameters/*"/>
+			<include name="core/keyhandlers/identifiers/*"/>
+			<include name="core/keyhandlers/keydata/*"/>
+			<include name="app/*"/>
+		</javac>	
+</target>
+
+<target name="extras" depends="init, build" description="Build extra stuff">
+	<echo>Building extras...</echo>
+
+		<mkdir dir="${bld}"/>
+
+		<javac srcdir="${src}"
+			destdir="${bld}"
+		>
+			<include name="extras/websitemailer/*"/>
+			<include name="extras/cgimailer/*"/>
+			<include name="extras/quickencrypt/*"/>
+			
+		</javac>	
+</target>
+
+<target name="tests" depends="init, build" description="Build test applications">
+
+	<echo>Building test applications...</echo>
+	
+		<mkdir dir="${bld}"/>
+
+		<javac srcdir="${src}"
+			destdir="${bld}"
+		>
+			<include name="test/*"/>
+			<include name="debug/*"/>
+  		</javac>
+  		
+  		<copy todir="${bld}/test/testdata">
+			<fileset dir="${src}/test/testdata"/>
+		</copy>
+
+</target>
+
+
+<target name="runtests" depends="init, tests" description="Execute all the tests... perhaps not all that useful, but a quick way to see if a change breaks something">
+	<record name="runtests-${DSTAMP}_${TSTAMP}.log" append="no" />
+	
+	<echo>Running tests...</echo>
+    	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestTest" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestIDEA" failonerror="true" /> 
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestRSA" failonerror="true" /> 
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestPGPCFBsimple" failonerror="true"><arg value="500"/> <arg value="TestPGPCFBsimple.csv"/> </java>
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestPGPCFB" failonerror="true"><arg value="500"/> <arg value="TestPGPCFB.csv"/> </java>
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestMPIEncode" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestMPIBug" failonerror="true"><arg value="20"/> </java>
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestMPIBug2" failonerror="true" />
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestBase64" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestS2K" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestASCIIArmor" failonerror="true" />
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestEmailClass" failonerror="true" />
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestRSAPKESKP" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestSKESKP" failonerror="true" />
+	
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestUserIDPacket" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestLiteralDataPacket" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestCompressedDataPacket" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestSymmetricallyEncryptedDataPacket" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestSecretKeyPacketSimple" failonerror="true" />
+        <java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestV3SecretKeyPacketSimple" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestSecretKeyPacket" failonerror="true" />
+		
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestPacketDecode" failonerror="true" />
+	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestV3Signature" failonerror="true" />
+ 	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestV3SignatureDecode" failonerror="true" />
+ 	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestV4Signature" failonerror="true" />
+ 	<java classpath="${bld}" dir="${bld}" fork="true" classname="test.TestOpenPGPKeyrings" failonerror="true" />
+ 
+</target>
+
+
+<target name="dist" depends="init, document, build" description="Construct a release distribution">	
+	<mkdir dir="${dst}"/>
+	
+	<jar destfile="${dst}/SecureEmailProxy-${build.version}.jar" basedir="${bld}" index="true">
+		<manifest>
+			<attribute name="Built-By" value="${user.name}"/>
+			<attribute name="Main-Class" value="app.EmailProxy"/>
+			<attribute name="Sealed" value="true" />
+			<section name="common">
+				<attribute name="Specification-Title" value="Secure Email Proxy"/>
+				<attribute name="Specification-Version" value="${build.version}"/>
+				<attribute name="Specification-Vendor" value="Secure Email Project"/>
+				<attribute name="Implementation-Title" value="common"/>
+				<attribute name="Implementation-Version" value="${build.version} ${TODAY}"/> 
+				<attribute name="Implementation-Vendor" value="Oxford Brookes University"/>
+			</section>
+		</manifest>
+
+	</jar>
+	<checksum file="${dst}/SecureEmailProxy-${build.version}.jar" />
+	
+	<zip destfile="${dst}/SecureEmailProxy-${build.version}-src.zip">
+	    <zipfileset dir="${src}" prefix="src"/>
+	    <zipfileset dir="${doc}" prefix="user-guide"/>
+  	</zip>
+  	<checksum file="${dst}/SecureEmailProxy-${build.version}-src.zip" />
+  	
+  	<tar destfile="${dst}/SecureEmailProxy-${build.version}-src.tar.gz" compression="gzip">
+	    <tarfileset dir="${src}" prefix="src"/>
+	    <tarfileset dir="${doc}" prefix="user-guide"/>
+	</tar>
+  	<checksum file="${dst}/SecureEmailProxy-${build.version}-src.tar.gz" />
+</target>
+
+<target name="snapshot" depends="init, document, build, tests, extras" description="Construct a development snapshot">
+	<mkdir dir="${snap}"/>
+	
+	<jar destfile="${snap}/SecureEmailProxy-${DSTAMP}.jar" basedir="${bld}" index="true">
+		<manifest>
+			<attribute name="Built-By" value="${user.name}"/>
+			<attribute name="Main-Class" value="app.EmailProxy"/>
+			<attribute name="Sealed" value="true" />
+			<section name="common">
+				<attribute name="Specification-Title" value="Secure Email Proxy"/>
+				<attribute name="Specification-Version" value="${build.version}"/>
+				<attribute name="Specification-Vendor" value="Secure Email Project"/>
+				<attribute name="Implementation-Title" value="common"/>
+				<attribute name="Implementation-Version" value="Snapshot ${TODAY}"/> 
+				<attribute name="Implementation-Vendor" value="Oxford Brookes University"/>
+			</section>
+		</manifest>
+	</jar>
+	<checksum file="${snap}/SecureEmailProxy-${DSTAMP}.jar" />
+	
+	<zip destfile="${snap}/SecureEmailProxy-${DSTAMP}-src.zip">
+	    <zipfileset dir="${src}" prefix="src"/>
+	    <zipfileset dir="${doc}" prefix="user-guide"/>
+	</zip>
+  	<checksum file="${snap}/SecureEmailProxy-${DSTAMP}-src.zip" />
+  	
+  	<tar destfile="${snap}/SecureEmailProxy-${DSTAMP}-src.tar.gz" compression="gzip">
+	    <tarfileset dir="${src}" prefix="src"/>
+	    <tarfileset dir="${doc}" prefix="user-guide"/>
+	</tar>
+  	<checksum file="${snap}/SecureEmailProxy-${DSTAMP}-src.tar.gz" />
+</target>
+
+
+<target name="clean" description="Cleaning up">
+	<delete dir="${dst}"/>
+	<delete dir="${doc}"/>
+	<delete dir="${bld}"/>
+</target>
+
+
+
+
+<!-- Special builds -->
+<target name="quickencrypt" depends="init, build" description="Quick message encrypter">
+	<mkdir dir="${bld}"/>
+	
+	<javac srcdir="${src}"
+		destdir="${bld}"
+	>
+		<include name="extras/quickencrypt/*"/>
+	</javac>
+	
+	
+	<mkdir dir="${dst}"/>
+		
+	<jar destfile="${dst}/SecureEmailQuickEncrypt.jar" basedir="${bld}" index="true">
+		<manifest>
+			<attribute name="Built-By" value="${user.name}"/>
+			<attribute name="Main-Class" value="extras.quickencrypt.QuickEncrypt"/>
+			<attribute name="Sealed" value="true" />
+			<section name="common">
+				<attribute name="Specification-Title" value="Secure Email Quick Encrypt"/>
+				<attribute name="Specification-Vendor" value="Secure Email Project"/>
+				<attribute name="Implementation-Title" value="common"/>
+				<attribute name="Implementation-Vendor" value="Oxford Brookes University"/>
+			</section>
+		</manifest>
+
+	</jar>
+	<checksum file="${dst}/SecureEmailQuickEncrypt.jar" />
+	
+</target>
+
+</project>
+
+
